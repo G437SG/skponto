@@ -3,12 +3,8 @@ from datetime import timedelta
 
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
-    DEBUG = os.environ.get('DEBUG', 'False') == 'True'
     
-    # Database configuration
-    DATABASE_URI = os.environ.get('DATABASE_URI') or 'mongodb://localhost:27017/time-tracking'
-    
-    # Firebase configuration (if using Firebase Firestore)
+    # Firebase Configuration
     FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID') or 'ponto-online-default'
     FIREBASE_PRIVATE_KEY_ID = os.environ.get('FIREBASE_PRIVATE_KEY_ID') or ''
     FIREBASE_PRIVATE_KEY = os.environ.get('FIREBASE_PRIVATE_KEY', '').replace('\\n', '\n') if os.environ.get('FIREBASE_PRIVATE_KEY') else ''
@@ -35,3 +31,22 @@ class Config:
     WORKER_WORK_HOURS = 8
     INTERN_WORK_HOURS = 6
     LUNCH_BREAK = 1
+    
+    # Production Settings
+    TESTING = False
+    DEBUG = False if os.environ.get('RENDER') else True
+    
+class DevelopmentConfig(Config):
+    DEBUG = True
+    TESTING = True
+
+class ProductionConfig(Config):
+    DEBUG = False
+    TESTING = False
+
+# Choose config based on environment
+config = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'default': DevelopmentConfig
+}
