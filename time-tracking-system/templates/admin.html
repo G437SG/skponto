@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        <h1>Painel do Administrador</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('admin.view_records') }}">Ver Registros</a></li>
+                <li><a href="{{ url_for('admin.generate_reports') }}">Gerar Relatórios</a></li>
+                <li><a href="{{ url_for('admin.send_notifications') }}">Enviar Notificações</a></li>
+                <li><a href="{{ url_for('auth.logout') }}">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Bem-vindo, {{ user.username }}</h2>
+            <p>Aqui você pode gerenciar os registros de ponto e as notificações dos usuários.</p>
+        </section>
+        <section>
+            <h3>Registros Recentes</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Data</th>
+                        <th>Entrada</th>
+                        <th>Saída</th>
+                        <th>Total de Horas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in recent_records %}
+                    <tr>
+                        <td>{{ record.user }}</td>
+                        <td>{{ record.date }}</td>
+                        <td>{{ record.check_in }}</td>
+                        <td>{{ record.check_out }}</td>
+                        <td>{{ record.total_hours }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; {{ current_year }} Seu Nome. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>

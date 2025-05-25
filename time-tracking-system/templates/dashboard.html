@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Usuário</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">Início</a></li>
+                <li><a href="{{ url_for('logout') }}">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <h1>Bem-vindo, {{ user.name }}!</h1>
+        <section>
+            <h2>Registro de Ponto</h2>
+            <form action="{{ url_for('clock_in_out') }}" method="POST">
+                <button type="submit">Bater Ponto</button>
+            </form>
+        </section>
+        <section>
+            <h2>Notificações</h2>
+            <ul>
+                {% for notification in notifications %}
+                    <li>{{ notification.message }} - {{ notification.date }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section>
+            <h2>Relatórios</h2>
+            <form action="{{ url_for('generate_report') }}" method="GET">
+                <button type="submit">Gerar Relatório</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; {{ current_year }} Seu Nome ou Empresa. Todos os direitos reservados.</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
