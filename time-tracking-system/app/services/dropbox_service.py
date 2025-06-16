@@ -3,7 +3,6 @@ from dropbox.exceptions import AuthError, ApiError
 import os
 from datetime import datetime
 import uuid
-from flask import current_app
 
 class DropboxService:
     def __init__(self):
@@ -26,13 +25,14 @@ class DropboxService:
                 print(f"Dropbox initialization error: {e}")
                 self.dbx = None
         else:
-            print("Warning: Dropbox access token not found")
+            print("Warning: Dropbox access token not found - using mock mode")
             self.dbx = None
     
     def upload_file(self, file_content, filename, folder_path="/uploads"):
         """Upload file to Dropbox and return public URL"""
         if not self.dbx:
-            return None
+            # Mock mode - return a fake URL for development
+            return f"https://mock-dropbox.com/files/{filename}"
         
         try:
             # Create unique filename
@@ -47,6 +47,69 @@ class DropboxService:
                 mode=dropbox.files.WriteMode('overwrite'),
                 autorename=True
             )
+            
+            # Create shared link
+            try:
+                shared_link = self.dbx.sharing_create_shared_link_with_settings(dropbox_path)
+                # Convert to direct download link
+                return shared_link.url.replace('dl=0', 'dl=1')
+            except Exception as e:
+                print(f"Error creating shared link: {e}")
+                return None
+                
+        except Exception as e:
+            print(f"Error uploading file to Dropbox: {e}")
+            return None
+    
+    def upload_user_photo(self, file_content, user_email, filename):
+        """Upload user profile photo"""
+        folder_path = f"/profile_photos/{user_email}"
+        return self.upload_file(file_content, filename, folder_path)
+    
+    def upload_report(self, file_content, filename):
+        """Upload report file"""
+        folder_path = f"/reports/{datetime.now().strftime('%Y/%m')}"
+        return self.upload_file(file_content, filename, folder_path)
+    
+    def delete_file(self, file_path):
+        """Delete file from Dropbox"""
+        if not self.dbx:
+            return True  # Mock mode
+        
+        try:
+            self.dbx.files_delete_v2(file_path)
+            return True
+        except Exception as e:
+            print(f"Error deleting file from Dropbox: {e}")
+            return False
+    
+    def list_files(self, folder_path="/"):
+        """List files in Dropbox folder"""
+        if not self.dbx:
+            return []  # Mock mode
+        
+        try:
+            result = self.dbx.files_list_folder(folder_path)
+            files = []
+            for entry in result.entries:
+                if isinstance(entry, dropbox.files.FileMetadata):
+                    files.append({
+                        'name': entry.name,
+                        'path': entry.path_lower,
+                        'size': entry.size,
+                        'modified': entry.server_modified
+                    })
+            return files
+        except Exception as e:
+            print(f"Error listing files from Dropbox: {e}")
+            return []
+    
+    def is_connected(self):
+        """Check if Dropbox is connected"""
+        return self.dbx is not None
+
+# Create global instance
+dropbox_service = DropboxService()
             
             # Create shared link
             try:

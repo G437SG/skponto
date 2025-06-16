@@ -13,6 +13,7 @@ def login():
         
         user = User.get_by_email(email)
         if user and user.check_password(password) and user.is_active:
+            session['user_id'] = user.user_id
             session['user_email'] = user.email
             session['user_type'] = user.user_type
             session['user_name'] = user.name
@@ -61,11 +62,14 @@ def register():
                     return render_template('register.html')
         
         # Create new user
-        user = User(email, password, name, user_type, photo_url)
-        user.save()
+        user = User(email=email, name=name, user_type=user_type, profile_picture=photo_url)
+        user.set_password(password)
         
-        flash('Cadastro realizado com sucesso!', 'success')
-        return redirect(url_for('auth.login'))
+        if user.save():
+            flash('Cadastro realizado com sucesso!', 'success')
+            return redirect(url_for('auth.login'))
+        else:
+            flash('Erro ao criar usuário. Tente novamente.', 'error')
     
     return render_template('register.html')
 
@@ -103,18 +107,16 @@ def profile():
                 # Upload new photo to Dropbox
                 new_photo_url = upload_user_photo(file, user.email)
                 if new_photo_url:
-                    # Delete old photo if exists
-                    if user.photo_url:
-                        # Could implement deletion here if needed
-                        pass
-                    user.photo_url = new_photo_url
+                    user.profile_picture = new_photo_url
                 else:
                     flash('Erro ao fazer upload da foto. Tente novamente.', 'error')
                     return render_template('profile.html', user=user)
         
-        user.save()
-        session['user_name'] = user.name  # Update session
-        flash('Perfil atualizado com sucesso!', 'success')
+        if user.save():
+            session['user_name'] = user.name  # Update session
+            flash('Perfil atualizado com sucesso!', 'success')
+        else:
+            flash('Erro ao atualizar perfil. Tente novamente.', 'error')
     
     return render_template('profile.html', user=user)
 
@@ -133,4 +135,8 @@ def forgot_password():
         
         return redirect(url_for('auth.login'))
     
+    return render_template('forgot_password.html')
+
+@bp.route('/recover_password')
+def recover_password():
     return render_template('forgot_password.html')
