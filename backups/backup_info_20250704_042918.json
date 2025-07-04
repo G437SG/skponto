@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-07-04T04:29:11.421181",
+  "version": "1.3.0",
+  "type": "database_backup",
+  "files": [
+    "config.py",
+    "requirements.txt",
+    "README.md",
+    "RELATORIO_MELHORIAS.md",
+    "app.py",
+    "init_db.py"
+  ]
+}
